@@ -17,6 +17,7 @@ import {
 import { Button, Divider, message, Space, Tabs } from "antd";
 import type { CSSProperties } from "react";
 import { useLoginStore } from "@stores/index";
+import http from "@utils/request";
 
 type LoginType = "phone" | "account";
 
@@ -27,20 +28,36 @@ const iconStyles: CSSProperties = {
   cursor: "pointer",
 };
 
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 const Login = () => {
   const [loginType, setLoginType] = useState<LoginType>("account");
   const { setUserInfo } = useLoginStore();
   const navigate = useNavigate();
   const onFinish = (values: any) => {
-    return delay(1000).then(() => {
-      message.success("登录成功🎉🎉🎉");
-      setUserInfo(values);
-      navigate("/", { replace: true });
-    });
+    if (loginType === "account") {
+      http
+        .request<{
+          userName: string;
+          id: number;
+        }>({
+          url: "/user/login",
+          data: {
+            userName: values.userName,
+            passWord: values.passWord,
+          },
+        })
+        .then((res) => {
+          if (res) {
+            if (res.errno === 0) {
+              message.success("登录成功🎉🎉🎉");
+              console.log(res.data);
+              setUserInfo(res.data);
+              navigate("/", { replace: true });
+            } else {
+              message.error(res.msg);
+            }
+          }
+        });
+    }
   };
   return (
     <div
@@ -151,7 +168,7 @@ const Login = () => {
         {loginType === "account" && (
           <>
             <ProFormText
-              name="username"
+              name="userName"
               fieldProps={{
                 size: "large",
                 prefix: <UserOutlined className={"prefixIcon"} />,
@@ -165,7 +182,7 @@ const Login = () => {
               ]}
             />
             <ProFormText.Password
-              name="password"
+              name="passWord"
               fieldProps={{
                 size: "large",
                 prefix: <LockOutlined className={"prefixIcon"} />,

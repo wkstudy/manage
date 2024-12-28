@@ -12,4 +12,16 @@ export default defineConfig({
     },
   },
   plugins: [react()],
+  server: {
+    proxy: {
+      "/user": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
+      "/activity": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
+    },
+  },
 });
