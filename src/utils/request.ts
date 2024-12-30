@@ -49,7 +49,7 @@ class HttpClient {
     // 处理http错误
     if (err.response?.status) {
       if (netError[err.response.status]) {
-        throw new Error(netError[err.response.status]);
+        message.error(netError[err.response.status]);
       }
     }
   }
@@ -68,20 +68,16 @@ class HttpClient {
     data,
     params,
     headers,
-  }: IRequestOptions): Promise<IRes<T> | undefined> {
+  }: IRequestOptions): Promise<IRes<T>> {
     {
-      try {
-        const response = await this.instance.request<IRes<T>>({
-          url,
-          method,
-          data,
-          params,
-          headers,
-        });
-        return response.data;
-      } catch (error: any) {
-        message.error(error?.message ?? "请求失败，请稍后再试");
-      }
+      const response = await this.instance.request<IRes<T>>({
+        url,
+        method,
+        data,
+        params,
+        headers,
+      });
+      return response.data;
     }
   }
 }

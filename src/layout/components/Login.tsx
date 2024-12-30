@@ -46,15 +46,13 @@ const Login = () => {
           },
         })
         .then((res) => {
-          if (res) {
-            if (res.errno === 0) {
-              message.success("登录成功🎉🎉🎉");
-              console.log(res.data);
-              setUserInfo(res.data);
-              navigate("/", { replace: true });
-            } else {
-              message.error(res.msg);
-            }
+          if (res.errno === 0) {
+            message.success("登录成功🎉🎉🎉");
+            console.log(res.data);
+            setUserInfo(res.data);
+            navigate("/", { replace: true });
+          } else {
+            message.error(res.msg);
           }
         });
     }
