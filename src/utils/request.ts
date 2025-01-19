@@ -5,7 +5,7 @@ import axios, {
   AxiosResponse,
 } from "axios";
 import { message } from "antd";
-
+import queryString from "query-string";
 interface IRes<T> {
   data: T;
   msg: string;
@@ -17,6 +17,7 @@ interface IRequestOptions {
   data?: AxiosRequestConfig["data"];
   params?: AxiosRequestConfig["params"];
   headers?: AxiosRequestConfig["headers"];
+  query?: Record<string, any>; // query请求 ?a=1&b=2
 }
 
 const netError: Record<number, string> = {
@@ -47,11 +48,15 @@ class HttpClient {
   }
   private handleErrRes(err: AxiosError): any {
     // 处理http错误
-    if (err.response?.status) {
+    const msg = (err.response?.data as { message?: string[] })?.message?.[0];
+    if (msg) {
+      message.error(msg);
+    } else if (err.response?.status) {
       if (netError[err.response.status]) {
         message.error(netError[err.response.status]);
       }
     }
+    return Promise.reject(err);
   }
   private handleSuccRes(response: AxiosResponse): AxiosResponse {
     // // 处理内部data错误

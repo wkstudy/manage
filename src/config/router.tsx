@@ -14,6 +14,7 @@ import {
 const Dashboard = lazy(() => import("../pages/Dashboard"));
 const FormPage = lazy(() => import("../pages/FormPage"));
 const TablePage = lazy(() => import("../pages/TablePage"));
+const UserPage = lazy(() => import("../pages/UserPage"));
 const AccountCenter = lazy(() => import("../pages/AccountPage/AccountCenter"));
 const AccountSettings = lazy(
   () => import("../pages/AccountPage/AccountSettings")
@@ -29,6 +30,12 @@ const routes = [
       {
         errorElement: <ErrorPage />,
         children: [
+          {
+            path: "account",
+            title: "用户管理",
+            icon: <UserOutlined />,
+            element: <UserPage />,
+          },
           {
             index: true,
             title: "Dashboard",
@@ -54,17 +61,17 @@ const routes = [
             element: <DetailPage />,
           },
           {
-            path: "account",
+            path: "personal",
             title: "个人页",
             icon: <UserOutlined />,
             children: [
               {
-                path: "/account/center",
+                path: "/personal/center",
                 title: "个人中心",
                 element: <AccountCenter />,
               },
               {
-                path: "/account/settings",
+                path: "/personal/settings",
                 title: "个人设置",
                 element: <AccountSettings />,
               },

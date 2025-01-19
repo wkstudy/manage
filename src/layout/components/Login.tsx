@@ -17,7 +17,7 @@ import {
 import { Button, Divider, message, Space, Tabs } from "antd";
 import type { CSSProperties } from "react";
 import { useLoginStore } from "@stores/index";
-import http from "@utils/request";
+import { handleLogin } from "@services/user";
 
 type LoginType = "phone" | "account";
 
@@ -34,27 +34,22 @@ const Login = () => {
   const navigate = useNavigate();
   const onFinish = (values: any) => {
     if (loginType === "account") {
-      http
-        .request<{
-          userName: string;
-          id: number;
-        }>({
-          url: "/user/login",
-          data: {
-            userName: values.userName,
-            passWord: values.passWord,
-          },
-        })
-        .then((res) => {
-          if (res.errno === 0) {
-            message.success("登录成功🎉🎉🎉");
-            console.log(res.data);
-            setUserInfo(res.data);
-            navigate("/", { replace: true });
-          } else {
-            message.error(res.msg);
-          }
-        });
+      handleLogin<{
+        userName: string;
+        id: number;
+      }>({
+        userName: values.userName,
+        passWord: values.passWord,
+      }).then((res) => {
+        if (res.errno === 0) {
+          message.success("登录成功🎉🎉🎉");
+          console.log(res.data);
+          setUserInfo(res.data);
+          navigate("/", { replace: true });
+        } else {
+          message.error(res.msg);
+        }
+      });
     }
   };
   return (
