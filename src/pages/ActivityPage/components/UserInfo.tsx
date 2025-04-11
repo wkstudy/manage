@@ -10,7 +10,6 @@ import {
   Form,
   Input,
   InputNumber,
-  Row,
   Select,
 } from "antd";
 import dayjs from "dayjs";
@@ -86,6 +85,7 @@ const createUser: React.FC<UserInfoType & ModalProps> = (props) => {
         "YYYY-MM-DD HH:mm:ss"
       ) as unknown as Date;
     }
+    console.log(11);
     fn(params).then((res) => {
       if (res.errno === 0) {
         if (props.onOk) {

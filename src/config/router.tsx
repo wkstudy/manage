@@ -9,12 +9,15 @@ import {
   TableOutlined,
   BarsOutlined,
   UserOutlined,
+  CommentOutlined,
 } from "@ant-design/icons";
 
 const Dashboard = lazy(() => import("../pages/Dashboard"));
 const FormPage = lazy(() => import("../pages/FormPage"));
 const TablePage = lazy(() => import("../pages/TablePage"));
 const UserPage = lazy(() => import("../pages/UserPage"));
+const ActivityPage = lazy(() => import("../pages/ActivityPage"));
+
 const AccountCenter = lazy(() => import("../pages/AccountPage/AccountCenter"));
 const AccountSettings = lazy(
   () => import("../pages/AccountPage/AccountSettings")
@@ -35,6 +38,12 @@ const routes = [
             title: "用户管理",
             icon: <UserOutlined />,
             element: <UserPage />,
+          },
+          {
+            path: "activity",
+            title: "活动管理",
+            icon: <CommentOutlined />,
+            element: <ActivityPage />,
           },
           {
             index: true,
