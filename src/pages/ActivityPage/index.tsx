@@ -5,27 +5,31 @@ import type { ActionType, ProColumns } from "@ant-design/pro-components";
 import { ProTable, TableDropdown } from "@ant-design/pro-components";
 import { Button, Dropdown, message, Modal, Tag } from "antd";
 import { handleUserList, removeUser } from "@services/user";
-import UserInfo from "./components/UserInfo";
-import type { UserInfoType } from "./components/UserInfo";
+import { handleActivityList } from "@services/activity";
+import ActivityInfo from "./components/ActivityInfo";
+import type { ActivityInfoType } from "./components/ActivityInfo";
 
-export interface UserInfo {
+export interface ActivityInfo {
   id: number;
-  userName: string;
-  passWord: string;
-  avatar?: string;
-  birthDate?: Date;
-  gender: number;
-  height: number;
-  weight: number;
-  school: string;
-  degree: string;
-  occupation: string;
-  company: string;
+  name: string;
+  startTime: Date;
+  endTime: Date;
+  place: string;
+  min: number;
+  max: number;
+  money: number;
+  banner: string;
+  status: number; //0 草稿 1 线上  2 线下
+  registrationTime: Date;
+  introduction: string;
+  note: string;
+  content: string;
   createTime: Date;
   updateTime: Date;
+  isDelete: number; //0 未删除 1 已删除
 }
 
-const handleDelete = (record: UserInfo, action: ActionType | undefined) => {
+const handleDelete = (record: ActivityInfo, action: ActionType | undefined) => {
   Modal.confirm({
     title: "确定删除此用户吗?",
     // content: "This action cannot be undone.",
@@ -51,26 +55,26 @@ const handleDelete = (record: UserInfo, action: ActionType | undefined) => {
 const TablePage: React.FC = () => {
   const actionRef = useRef<ActionType>();
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<UserInfoType["mode"]>("create");
-  const [info, setInfo] = useState<UserInfo>();
-  const handleView = (record: UserInfo) => {
+  const [mode, setMode] = useState<ActivityInfoType["mode"]>("create");
+  const [info, setInfo] = useState<ActivityInfo>();
+  const handleView = (record: ActivityInfo) => {
     setMode("view");
     setOpen(true);
     setInfo(record);
   };
-  const handleUpdate = (record: UserInfo) => {
+  const handleUpdate = (record: ActivityInfo) => {
     setMode("edit");
     setOpen(true);
     setInfo(record);
   };
-  const handleCopy = (record: UserInfo) => {
+  const handleCopy = (record: ActivityInfo) => {
     setMode("copy");
     setOpen(true);
     setInfo(record);
   };
   const handleOper = (
     key: React.Key,
-    record: UserInfo,
+    record: ActivityInfo,
     action: ActionType | undefined
   ) => {
     const oper = {
@@ -79,25 +83,24 @@ const TablePage: React.FC = () => {
     };
     oper[key as "copy" | "delete"](record, action);
   };
-  const columns: ProColumns<UserInfo>[] = [
+  const columns: ProColumns<ActivityInfo>[] = [
     {
       title: "id",
       dataIndex: "id",
     },
     {
-      title: "用户名",
-      dataIndex: "userName",
+      title: "活动名称",
+      dataIndex: "name",
       copyable: true,
       ellipsis: true,
-      // tip: "请输入用户名",
-      // formItemProps: {
-      //   rules: [
-      //     {
-      //       required: true,
-      //       message: "此项为必填项",
-      //     },
-      //   ],
-      // },
+      formItemProps: {
+        rules: [
+          {
+            // required: true,
+            // message: "此项为必填项",
+          },
+        ],
+      },
     },
     {
       title: "创建时间",
@@ -161,21 +164,19 @@ const TablePage: React.FC = () => {
 
   return (
     <>
-      <ProTable<UserInfo, { id: number; userName: string }>
+      <ProTable<ActivityInfo, { id: number; name: string }>
         columns={columns}
         actionRef={actionRef}
         cardBordered
         request={async (params, sort) => {
-          console.log(sort);
-          const res = await handleUserList<{
+          const res = await handleActivityList<{
             count: number;
             page: number;
-            list: UserInfo[];
+            list: ActivityInfo[];
           }>({
             ...params,
             curPage: params.current as number,
             pageSize: params.pageSize as number,
-            sort,
           });
           if (res.errno !== 0) {
             message.error(res.msg || "请求失败，请重试");
@@ -184,6 +185,7 @@ const TablePage: React.FC = () => {
               success: false,
             };
           }
+          console.log(res);
           return {
             data: res.data.list,
             success: res.errno === 0,
@@ -235,7 +237,7 @@ const TablePage: React.FC = () => {
           </Dropdown>,
         ]}
       />
-      <UserInfo
+      <ActivityInfo
         mode={mode}
         open={open}
         onOk={handleOk}

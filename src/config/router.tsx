@@ -2,7 +2,11 @@ import React, { lazy } from "react";
 import ErrorPage from "@components/ErrorPage";
 import LoginPage from "../layout/components/Login";
 import App, { authLoader } from "../App";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  createHashRouter,
+} from "react-router-dom";
 import {
   DashboardOutlined,
   EditOutlined,
@@ -102,4 +106,4 @@ const routes = [
 
 export { routes };
 
-export default createBrowserRouter(routes);
+export default createHashRouter(routes);
