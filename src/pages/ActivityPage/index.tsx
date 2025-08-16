@@ -4,8 +4,11 @@ import { EllipsisOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ActionType, ProColumns } from "@ant-design/pro-components";
 import { ProTable, TableDropdown } from "@ant-design/pro-components";
 import { Button, Dropdown, message, Modal, Tag } from "antd";
-import { handleUserList, removeUser } from "@services/user";
-import { handleActivityList } from "@services/activity";
+import {
+  handleActivityList,
+  removeActivity,
+  switchStatus,
+} from "@services/activity";
 import ActivityInfo from "./components/ActivityInfo";
 import type { ActivityInfoType } from "./components/ActivityInfo";
 
@@ -29,29 +32,6 @@ export interface ActivityInfo {
   isDelete: number; //0 未删除 1 已删除
 }
 
-const handleDelete = (record: ActivityInfo, action: ActionType | undefined) => {
-  Modal.confirm({
-    title: "确定删除此用户吗?",
-    // content: "This action cannot be undone.",
-    onOk() {
-      removeUser({ id: record.id }).then((res) => {
-        if (res.errno !== 0) {
-          message.error(res.msg || "请求失败，请重试");
-        } else {
-          message.success("删除成功");
-          if (action) {
-            action.reload();
-          }
-        }
-      });
-    },
-    onCancel() {
-      // 在取消按钮点击时的回调函数
-      console.log("Cancel");
-    },
-  });
-};
-
 const TablePage: React.FC = () => {
   const actionRef = useRef<ActionType>();
   const [open, setOpen] = useState(false);
@@ -72,6 +52,68 @@ const TablePage: React.FC = () => {
     setOpen(true);
     setInfo(record);
   };
+  const handlePublish = (record: ActivityInfo) => {
+    Modal.confirm({
+      title: `确定发布此id=${record.id}的活动吗?`,
+      // content: "This action cannot be undone.",
+      onOk() {
+        switchStatus({ id: record.id, status: 1 }).then((res) => {
+          if (res.errno !== 0) {
+            message.error(res.msg || "请求失败，请重试");
+          } else {
+            message.success("发布成功");
+            actionRef.current?.reload();
+          }
+        });
+      },
+      onCancel() {
+        // 在取消按钮点击时的回调函数
+        console.log("Cancel");
+      },
+    });
+  };
+
+  const handleOffline = (record: ActivityInfo) => {
+    Modal.confirm({
+      title: `确定下线此id=${record.id}的活动吗?`,
+      // content: "This action cannot be undone.",
+      onOk() {
+        switchStatus({ id: record.id, status: 2 }).then((res) => {
+          if (res.errno !== 0) {
+            message.error(res.msg || "请求失败，请重试");
+          } else {
+            message.success("下线成功");
+            actionRef.current?.reload();
+          }
+        });
+      },
+      onCancel() {
+        // 在取消按钮点击时的回调函数
+        console.log("Cancel");
+      },
+    });
+  };
+  const handleDelete = (record: ActivityInfo) => {
+    Modal.confirm({
+      title: `确定删除此id=${record.id}的活动吗?`,
+      // content: "This action cannot be undone.",
+      onOk() {
+        removeActivity({ id: record.id }).then((res) => {
+          if (res.errno !== 0) {
+            message.error(res.msg || "请求失败，请重试");
+          } else {
+            message.success("删除成功");
+            actionRef?.current?.reload();
+          }
+        });
+      },
+      onCancel() {
+        // 在取消按钮点击时的回调函数
+        console.log("Cancel");
+      },
+    });
+  };
+
   const handleOper = (
     key: React.Key,
     record: ActivityInfo,
@@ -80,6 +122,7 @@ const TablePage: React.FC = () => {
     const oper = {
       copy: handleCopy,
       delete: handleDelete,
+      publish: handlePublish,
     };
     oper[key as "copy" | "delete"](record, action);
   };
@@ -100,6 +143,16 @@ const TablePage: React.FC = () => {
             // message: "此项为必填项",
           },
         ],
+      },
+    },
+    {
+      title: "状态",
+      dataIndex: "status",
+      valueType: "select",
+      valueEnum: {
+        0: { text: "草稿", status: "Default" },
+        1: { text: "线上", status: "Processing" },
+        2: { text: "线下", status: "Success" },
       },
     },
     {
@@ -128,9 +181,12 @@ const TablePage: React.FC = () => {
       search: {
         transform: (value) => {
           console.log(value);
+          // return {
+          //   startTime: `${value[0]} 00:00:00`,
+          //   endTime: `${value[1]} 23:59:59`,
+          // };
           return {
-            startTime: `${value[0]} 00:00:00`,
-            endTime: `${value[1]} 23:59:59`,
+            time: [`${value[0]} 00:00:00`, `${value[1]} 23:59:59`],
           };
         },
       },
@@ -139,22 +195,60 @@ const TablePage: React.FC = () => {
       title: "操作",
       valueType: "option",
       key: "option",
-      render: (text, record, _, action) => [
-        <a key="view" onClick={() => handleView(record)}>
-          查看
-        </a>,
-        <a key="editable" onClick={() => handleUpdate(record)}>
-          更新
-        </a>,
-        <TableDropdown
-          key="actionGroup"
-          onSelect={(key) => handleOper(key, record, action)}
-          menus={[
-            { key: "copy", name: "复制" },
-            { key: "delete", name: "删除" },
-          ]}
-        />,
-      ],
+      render: (text, record, _, action) => {
+        const look = (
+          <a key="view" onClick={() => handleView(record)}>
+            查看
+          </a>
+        );
+        const edit = (
+          <a key="editable" onClick={() => handleUpdate(record)}>
+            更新
+          </a>
+        );
+        const copy = (
+          <a key="copy" onClick={() => handleCopy(record)}>
+            复制
+          </a>
+        );
+        const publish = (
+          <a key="publish" onClick={() => handlePublish(record)}>
+            发布
+          </a>
+        );
+        const offline = (
+          <a key="offline" onClick={() => handleOffline(record)}>
+            下线
+          </a>
+        );
+        const del = (
+          <a key="delete" onClick={() => handleDelete(record)}>
+            删除
+          </a>
+        );
+        const res: Record<number, React.ReactNode[]> = {
+          0: [look, edit, copy, publish, del],
+          1: [look, copy, offline],
+          2: [look, edit, copy, publish, del],
+        };
+        return res[record.status];
+        // return [
+        //   <a key="view" onClick={() => handleView(record)}>
+        //     查看
+        //   </a>,
+        //   <a key="editable" onClick={() => handleUpdate(record)}>
+        //     更新
+        //   </a>,
+        //   <TableDropdown
+        //     key="actionGroup"
+        //     onSelect={(key) => handleOper(key, record, action)}
+        //     menus={[
+        //       { key: "copy", name: "复制" },
+        //       { key: "delete", name: "删除" },
+        //     ]}
+        //   />,
+        // ];
+      },
     },
   ];
   const handleOk = () => {

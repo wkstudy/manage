@@ -28,17 +28,24 @@ export const createActivity = <T>(req: Partial<ActivityInfo>) => {
   });
 };
 
-// export const removeUser = <T>(req: { id: number }) => {
-//   return http.request<T>({
-//     url: "/user/remove",
-//     params: req,
-//     method: "GET",
-//   });
-// };
+export const removeActivity = <T>(req: { id: number }) => {
+  return http.request<T>({
+    url: "/activity/remove",
+    params: req,
+    method: "GET",
+  });
+};
 
 export const updateActivity = <T>(req: Partial<ActivityInfo>) => {
   return http.request<T>({
-    url: "/user/update",
+    url: "/activity/update",
+    data: req,
+  });
+};
+
+export const switchStatus = <T>(req: Partial<ActivityInfo>) => {
+  return http.request<T>({
+    url: "/activity/switchStatus",
     data: req,
   });
 };

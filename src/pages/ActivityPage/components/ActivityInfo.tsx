@@ -48,16 +48,28 @@ const createActivitys: React.FC<ActivityInfoType & ModalProps> = (props) => {
   const [form] = Form.useForm();
   const noticeRef = useRef<any>(null);
   const contentRef = useRef<any>(null);
+  const [notice, setNotice] = React.useState<object>({});
+  const [content, setContent] = React.useState<object>({});
+  const [editable, setEditable] = React.useState<boolean>(true);
 
   useEffect(() => {
     if (props.open) {
+      setEditable(props.mode !== "view");
       if (["view", "edit", "copy"].includes(props.mode)) {
         form.setFieldsValue({
           ...props.info,
-          // birthDate: props?.info?.birthDate
-          //   ? dayjs(props.info.birthDate, "YYYY-MM-DD")
-          //   : null,
+          money: Number(props.info?.money),
+          time: [
+            dayjs(props.info?.startTime, "YYYY-MM-DD HH:mm:ss"),
+            dayjs(props.info?.endTime, "YYYY-MM-DD HH:mm:ss"),
+          ],
+          registrationTime: dayjs(
+            props.info?.registrationTime,
+            "YYYY-MM-DD HH:mm:ss"
+          ),
         });
+        setNotice(JSON.parse(props.info?.note || "{}"));
+        setContent(JSON.parse(props.info?.content || "{}"));
       } else if (props.mode === "create") {
         form.resetFields();
       }
@@ -71,11 +83,8 @@ const createActivitys: React.FC<ActivityInfoType & ModalProps> = (props) => {
       startTime: values.time[0].format("YYYY-MM-DD HH:mm:ss"),
       endTime: values.time[1].format("YYYY-MM-DD HH:mm:ss"),
       registrationTime: values.registrationTime.format("YYYY-MM-DD HH:mm:ss"),
-      noitce: JSON.stringify(noticeRef.current?.value?.editor?.getJSON()),
+      note: JSON.stringify(noticeRef.current?.value?.editor?.getJSON()),
       content: JSON.stringify(contentRef.current?.value?.editor?.getJSON()),
-      // birthDate: values.birthDate
-      //   ? dayjs(values.birthDate).format("YYYY-MM-DD")
-      //   : null,
       updateTime: dayjs().format("YYYY-MM-DD HH:mm:ss"),
     };
     if (props.mode === "edit") {
@@ -184,7 +193,21 @@ const createActivitys: React.FC<ActivityInfoType & ModalProps> = (props) => {
         >
           <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />
         </Form.Item>
-        <Form.Item label="活动人数（最少）" name="min">
+        <Form.Item
+          label="活动人数（最少）"
+          name="min"
+          rules={[
+            {
+              required: true,
+              message: "请输入活动人数（最少）",
+            },
+            {
+              type: "number",
+              min: 0,
+              message: "人数不能小于0",
+            },
+          ]}
+        >
           <InputNumber />
         </Form.Item>
         <Form.Item
@@ -208,7 +231,14 @@ const createActivitys: React.FC<ActivityInfoType & ModalProps> = (props) => {
         <Form.Item
           label="报名费"
           name="money"
-          rules={[{ type: "number", min: 0 }]}
+          rules={[
+            { required: true, message: "请输入报名费" },
+            {
+              type: "number",
+              min: 0,
+              message: "报名费不能小于0",
+            },
+          ]}
         >
           <InputNumber />
         </Form.Item>
@@ -218,11 +248,11 @@ const createActivitys: React.FC<ActivityInfoType & ModalProps> = (props) => {
         </Form.Item>
 
         <Form.Item label="注意事项" name="note">
-          <Tiptap ref={noticeRef} />
+          <Tiptap ref={noticeRef} content={notice} editable={editable} />
         </Form.Item>
 
         <Form.Item label="活动内容" name="content">
-          <Tiptap ref={contentRef} />
+          <Tiptap ref={contentRef} content={content} editable={editable} />
         </Form.Item>
         {props.mode !== "view" && (
           <>

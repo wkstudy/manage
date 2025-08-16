@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle } from "react";
 import {
   useEditor,
   EditorContent,
@@ -245,12 +245,25 @@ function MenuBar({ editor }: { editor: Editor }) {
     </div>
   );
 }
-const Tiptap = (prop, ref: any) => {
+const Tiptap = (
+  { content, editable = true }: { content: object; editable: boolean },
+  ref: any
+) => {
   const editor = useEditor({
     extensions: [StarterKit, TextStyleKit, Image], // define your extension array
   });
   // Memoize the provider value to avoid unnecessary re-renders
   const providerValue = useMemo(() => ({ editor }), [editor]);
+
+  useEffect(() => {
+    if (editor && content) {
+      editor.commands.setContent(content);
+    }
+    if (!editable) {
+      editor.setEditable(false);
+    }
+  }, [content]);
+
   useImperativeHandle(
     ref,
     () => {
