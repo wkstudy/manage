@@ -15,6 +15,8 @@ export const handleActivityList = <T>(req: {
   curPage: number;
   status?: number;
   pageSize: number;
+  orderName?: string;
+  orderType?: SortOrder;
 }) => {
   return http.request<T>({
     url: "/activity/list",

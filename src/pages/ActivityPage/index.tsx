@@ -11,6 +11,7 @@ import {
 } from "@services/activity";
 import ActivityInfo from "./components/ActivityInfo";
 import type { ActivityInfoType } from "./components/ActivityInfo";
+import { SortOrder } from "antd/es/table/interface";
 
 export interface ActivityInfo {
   id: number;
@@ -173,6 +174,22 @@ const TablePage: React.FC = () => {
       key: "updateTime",
     },
     {
+      title: "开始时间",
+      dataIndex: "startTime",
+      valueType: "dateTime",
+      hideInSearch: true,
+      sorter: true,
+      key: "startTime",
+    },
+    {
+      title: "结束时间",
+      dataIndex: "endTime",
+      valueType: "dateTime",
+      sorter: true,
+      hideInSearch: true,
+      key: "endTime",
+    },
+    {
       title: "创建时间",
       dataIndex: "created_at",
       valueType: "dateRange",
@@ -263,15 +280,20 @@ const TablePage: React.FC = () => {
         actionRef={actionRef}
         cardBordered
         request={async (params, sort) => {
+          const obj: any = {
+            ...params,
+            curPage: params.current as number,
+            pageSize: params.pageSize as number,
+          };
+          if (Object.keys(sort).length) {
+            obj.orderName = Object.keys(sort)[0];
+            obj.orderType = sort[obj.orderName] === "ascend" ? "asc" : "desc";
+          }
           const res = await handleActivityList<{
             count: number;
             page: number;
             list: ActivityInfo[];
-          }>({
-            ...params,
-            curPage: params.current as number,
-            pageSize: params.pageSize as number,
-          });
+          }>(obj);
           if (res.errno !== 0) {
             message.error(res.msg || "请求失败，请重试");
             return {
